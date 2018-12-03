@@ -1,58 +1,132 @@
-## Project: Build a Traffic Sign Recognition Program
+# Project: Traffic Sign Recognition Program
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
-Overview
+In this project, I used convolutional neural networks to classify traffic signs using the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). 
+
 ---
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to classify traffic signs. You will train and validate a model so it can classify traffic sign images using the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). After the model is trained, you will then try out your model on images of German traffic signs that you find on the web.
 
-We have included an Ipython notebook that contains further instructions 
-and starter code. Be sure to download the [Ipython notebook](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb). 
-
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
-
-To meet specifications, the project will require submitting three files: 
-* the Ipython notebook with the code
-* the code exported as an html file
-* a writeup report either as a markdown or pdf file 
-
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/481/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
-
-The Project
----
 The goals / steps of this project are the following:
-* Load the data set
 * Explore, summarize and visualize the data set
 * Design, train and test a model architecture
 * Use the model to make predictions on new images
-* Analyze the softmax probabilities of the new images
-* Summarize the results with a written report
+* Analyze the results
 
-### Dependencies
-This lab requires:
 
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
+[//]: # (Image References)
 
-The lab environment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
+[dataset]: ./output_images/dataset.png "Dataset"
+[counts]: ./output_images/counts.png "Counts"
+[preprocessed]: ./output_images/preprocessed.png "Preprocessing"
+[nn]: ./output_images/nn.svg "Neural Network"
+[confusion]: ./output_images/confusion.png "Confusion Matrix"
+[test_images]:./output_images/test_images.png "Test images"
+[report]: ./output_images/report.png "Report"
 
-### Dataset and Repository
+---
 
-1. Download the data set. The classroom has a link to the data set in the "Project Instructions" content. This is a pickled dataset in which we've already resized the images to 32x32. It contains a training, validation and test set.
-2. Clone the project, which contains the Ipython notebook and the writeup template.
-```sh
-git clone https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project
-cd CarND-Traffic-Sign-Classifier-Project
-jupyter notebook Traffic_Sign_Classifier.ipynb
-```
+### Data Set Summary & Exploration
 
-### Requirements for Submission
-Follow the instructions in the `Traffic_Sign_Classifier.ipynb` notebook and write the project report using the writeup template as a guide, `writeup_template.md`. Submit the project code and writeup document.
+Summary statistics of the traffic signs data set:
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+* The size of training set is 34799
+* The size of the validation set is 4410
+* The size of test set is 12630
+* The shape of a traffic sign image is (32, 32, 3)
+* The number of unique classes/labels in the data set is 43
 
+![dataset]
+
+The bar chart shows the distribution of training and validation images in each class. The dataset is unbalanced with 150 to 2000 images per class.
+
+![counts]
+
+### Design and Test a Model Architecture
+
+#### Preprocessing dataset
+
+1. Normalize the data-set to centre the data around *zero* mean. This helps the network to learn faster since gradients act uniformly.
+
+2. Convert images from RGB to grayscale since the classification is not sign classification is not dependent on colour. This improved our accuracy.
+
+Here is an example of a traffic sign image before and after preprocessing.
+
+![preprocessed]
+
+#### Model Architecture
+![nn]
+
+My final model consisted of the following layers:
+
+| Layer           | Description                                 |
+|-----------------|---------------------------------------------|
+| Input           | 32x32x1 image                               |
+| Convolution 5x5 | 1x1 stride, valid padding, outputs 32x32x30 |
+| RELU            |                                             |
+| Dropout         |                                             |
+| Convolution 5x5 | 2x2 stride, same padding, outputs 14x14x30  |
+| RELU            |                                             |
+| Dropout         |                                             |
+| Convolution 5x5 | 1x1 stride, valid padding, outputs 14x14x64 |
+| RELU            |                                             |
+| Max pooling     | 2x2 stride, outputs 5x5x64                  |
+| Dropout         |                                             |
+| Flatten         | outputs 1600                                |
+| Fully connected | 1600-400                                    |
+| RELU            |                                             |
+| Dropout         |                                             |
+| Fully connected | 400-84                                      |
+| RELU            |                                             |
+| Dropout         |                                             |
+| Fully connected | 84-43                                       |
+
+Model parameters:
+* Adam optimizer
+* Learning rate: 0.001
+* Epochs: 20
+* Batch size: 128
+
+I started with the lenet-5 model. The table below shows my incremental steps towards the final model.
+
+| Changes                                                | Accuracy |
+|--------------------------------------------------------|----------|
+| Generic Lenet                                          | 0.891    |
+| Added normalization                                    | 0.902    |
+| Added grayscale                                        | 0.909    |
+| Changed conv layer depth to 30-64                      | 0.934    |
+| Added dropout                                          | 0.959    |
+| **Replaced 1st max pooling with conv layer with stride=2** | **0.963**    |
+
+My final model results were:
+* Validation set accuracy of 96.3%
+* Test set accuracy of 94.7%
+
+
+### Test a Model on New Images
+
+The following test images were used:
+
+![test_images]
+
+Here are the results of the prediction:
+
+| Image			        |     Prediction	        					|
+|:---------------------:|:---------------------------------------------:|
+| Bumpy road      		| Bumpy road   									|
+| Road work     			| Road work 										|
+| Right-of-way at next intersection | Right-of-way at next intersection|
+| Children crossing	      		| Children crossing |
+| Turn right ahead	| Turn right ahead	|
+
+We got a 100% accuracy on the test images. For each of the five images, the model is very sure about the classification and the first class probability is close to 100%. This means that the model is very certain about the classification results.
+
+### Test on test set
+
+I tested the network on the provided test dataset. It contains 12630 images. We got an accuracy of 94.7%.
+
+The following image shows the confusion matrix:
+
+![confusion]
+
+The following table shows a more detailed analysis:
+
+![report]
