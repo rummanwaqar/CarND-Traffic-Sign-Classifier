@@ -20,7 +20,6 @@ The goals / steps of this project are the following:
 [nn]: ./output_images/nn.png "Neural Network"
 [confusion]: ./output_images/confusion.png "Confusion Matrix"
 [test_images]:./output_images/test_images.png "Test images"
-[report]: ./output_images/report.png "Report"
 
 ---
 
@@ -129,4 +128,4 @@ The following image shows the confusion matrix:
 
 The following table shows a more detailed analysis:
 
-![report]
+<img src="./output_images/report.png" alt="analysis" width="400"/>
